@@ -3,7 +3,7 @@
 > คัดลอกเป็น `docs/OPEN_LOOPS.md` ใน Lab 00 · งานค้างที่ยังไม่ปิด · ลบแถวเมื่อเสร็จ  
 > Owner = `Claude` | `OpenCode` | `human`
 
-Last updated: 2026-09-25 15:45 +07:00
+Last updated: 2026-09-25 16:00 +07:00
 
 | ID | Task | Owner | Priority | Trigger / due | Notes |
 |---|---|---|---|---|---|
@@ -14,6 +14,8 @@ Last updated: 2026-09-25 15:45 +07:00
 | L9 | อ่านทวนถ้อยคำ case study 4 bullet ใน About · ตัดสินข้อตีความ D10 (ซ่อนปุ่มรองบน Home ตอนปิด) | human | P1 | ก่อน ship | D3 · D5 · D10 · #2 |
 | L6 | เพิ่ม `src/lib/profile.ts` ในตาราง Ownership (`AGENTS.md` / `CLAUDE.md`) = Claude frontend | human | P2 | — | D12 |
 | L7 | (ไม่บังคับ) rename repo หรือทำเป็น private เพื่อลดร่องรอยว่ามาจาก template | human | P2 | ก่อน ship | D6 |
+| L14 | `docs/guestbook-delete.md` ใช้ `DATA_DIR` เป็น path ไฟล์ตรง ๆ — ตอนตั้ง `DATA_DIR=/data` จะเปิดโฟลเดอร์แทน `site.sqlite` → ใช้ `path.join(DATA_DIR,'site.sqlite')` | OpenCode | P1 | ก่อน Lab 08 | พบใน Lab 06 E2E · `docs/QA.md` |
+| L15 | ลบแถวทดสอบ QA id 7–8 ใน `data/site.sqlite` ของเครื่อง (สิทธิ์ถูกปฏิเสธตอนรัน) · `.playwright-mcp/` ใส่ `.gitignore` แล้ว | human | P2 | ก่อน demo | `docs/QA.md` ข้อสังเกต |
 | L10 | ลบ branch ในเครื่อง `backup/pre-author-reset` (มี commit ที่ใช้อีเมลส่วนตัว · ห้าม push) | human | P2 | เมื่อมั่นใจว่า history ใหม่ถูกต้อง | L2 |
 
 ## ปิดแล้ว (ย่อ — ย้ายหรือลบได้เมื่อรก)
