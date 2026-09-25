@@ -77,5 +77,5 @@
 | #5 | Guestbook API: validate + rate limit + kill switch | D9 · D10 · D11 | MCP | Backend |
 | #6 | Contact v1: mailto นามแฝง + ปิด `/api/contact` | D8 | MCP | Frontend + Backend |
 | #7 | เก็บงาน PROFILE + git noreply | D1 · D2 · D3 · D7 | MCP | Claude + human |
-| #8 | Draft compare gh | — (ฝึกหัด) | gh | รอปิด |
-| #9–#12 | title ตามตัวอย่างในคอร์ส | เลข D ไม่ตรง · ซ้ำกับ #2 / #7 | gh | รอเจ้าของตัดสิน: ปิด duplicate หรือแก้ title |
+| #8 | Draft compare gh | — (ฝึกหัด ทาง A ขั้นที่ 4) | gh | เปิดไว้เป็นหลักฐาน gh |
+| #9–#12 | title ตามตัวอย่างในคอร์ส (ทาง B) | เลข D ไม่ตรง · ซ้ำกับ #2 / #4 / #7 | gh | **ปิดแล้ว** (not planned) พร้อมคอมเมนต์ชี้ไป issue ที่ถูก |
