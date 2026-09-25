@@ -3,8 +3,8 @@
 > คัดลอกเป็น `docs/STATUS.md` ใน Lab 00 · อ่านทุก session · **สั้น** · single-writer ต่อรอบ  
 > ดู [`COURSE.md`](../COURSE.md) ชั้น State (Hot)
 
-Last updated: 2026-09-25 15:05 +07:00  
-Updated by: OpenCode
+Last updated: 2026-09-25 15:25 +07:00  
+Updated by: Claude
 
 ## Current goal
 
@@ -18,10 +18,11 @@ Updated by: OpenCode
 - Lab 04 UI: D12 parser + `tests/profile.test.ts` · 5 หน้าทำใหม่โดย agent `frontend` ตาม D4–D15 · palette D15 (Teal) · contract check โดย OpenCode `backend` → `docs/fe-be-contract-check.md` (ไม่มี mismatch ฝั่ง UI) · PR #13 · handoff `docs/handoffs/04-claude-to-opencode.md`
 - L2: แก้ author ของ commit ที่ยังไม่ push ให้เป็น noreply ก่อน push ครั้งแรก (hash เปลี่ยนทั้งหมด · สำรองไว้ใน branch ในเครื่อง `backup/pre-author-reset`)
 - Lab 05 Backend: `db.ts` implement `insertContact` / `listGuestbook` / `insertGuestbook` (validate + error code ปลอดภัยตาม D11) · `guestbook.ts` kill switch per-request + validate 400 + honeypot silent-drop 201 + rate limit 429 (5 โพสต์/10 นาที/IP in-memory) + 5xx ข้อความกลาง · `contact.ts` ตอบ 410 (D8) · ขั้นตอนลบโพสต์ `docs/guestbook-delete.md` (D10 · L5) — ปิด L5
+- Lab 05 ขั้นที่ 4: agent `frontend` ตรวจการผูกฟอร์ม → `docs/be-fe-integration-check.md` · ไม่มี mismatch ของสัญญา · mismatch 5 ข้อใน `fe-be-contract-check.md` ปิดครบ · ข้อเสนอแนะ BE เรื่อง rate limit (L11)
 
 ## In progress
 
-- PR #13 รอ review / merge (ตอนนี้มี UI + API ครบใน branch เดียว)
+- Lab 05 ขั้นที่ 5: push `lab-05-backend` + เปิด PR Backend (PR #13 ของ Lab 04 merge แล้ว)
 
 ## Blocked
 
@@ -29,9 +30,10 @@ Updated by: OpenCode
 
 ## Next actions
 
-1. Claude: Lab 06 QA — อัปเดต `playwright/smoke.spec.ts` ให้ตรง D8 (L8) · รัน `npm run test:e2e` กับ dev server
-2. เจ้าของ: อ่านทวนถ้อยคำ case study ใน About (#2) · ตัดสินข้อตีความ D10 (ซ่อนปุ่มรองบน Home ตอนปิด) · แนบ screenshot ใน PR #13
-3. เจ้าของ: สร้างอีเมลนามแฝงแล้วแทน `demo@example.com` ใน PROFILE (L3)
+1. push `lab-05-backend` + เปิด PR Backend (Closes #5 · Refs #6)
+2. OpenCode `backend`: rate limit key + honeypot ที่ไม่ใช่ string (L11) ก่อน ship
+3. Claude: Lab 06 QA ตาม `docs/handoffs/05-opencode-to-claude.md` · แก้ `playwright/smoke.spec.ts` (L8) · ชื่อ error body จริงดูใน `docs/be-fe-integration-check.md`
+4. เจ้าของ: อ่านทวน case study (#2 · L9) · อีเมลนามแฝง (L3)
 
 ## Files changed in latest session
 
@@ -41,5 +43,5 @@ Updated by: OpenCode
 
 - Proposed vs Approved: brainstorm อยู่ใน `DEBATE.md` — สิ่งที่ปิดแล้วอยู่ใน `DECISIONS.md`
 - Latest D-id: **D15**
-- Writer รอบถัดไปของ STATUS/OPEN_LOOPS = Claude (หลัง commit + handoff นี้)
+- Writer ของ STATUS/OPEN_LOOPS ตอนนี้ = Claude (รับจาก handoff 05)
 - Verify ของรอบนี้: `npm run test:labs` เขียว (2) · `npm test` เขียว (11) · `npm run build` ผ่าน · curl สลับ `GUESTBOOK_ENABLED` ครบทั้ง GET/POST/410/400/429/503 (ดู handoff 05)
