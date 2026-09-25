@@ -3,11 +3,10 @@
 > คัดลอกเป็น `docs/OPEN_LOOPS.md` ใน Lab 00 · งานค้างที่ยังไม่ปิด · ลบแถวเมื่อเสร็จ  
 > Owner = `Claude` | `OpenCode` | `human`
 
-Last updated: 2026-09-25 14:40 +07:00
+Last updated: 2026-09-25 15:05 +07:00
 
 | ID | Task | Owner | Priority | Trigger / due | Notes |
 |---|---|---|---|---|---|
-| L5 | Guestbook API + `/api/contact` 410 + error ปลอดภัยใน `db.ts` + rate limit + ขั้นตอนลบโพสต์ (`docker exec` + `node -e`) | OpenCode | P0 | Lab 05 | D8 · D9 · D10 · D11 · #5 #6 · สัญญาอยู่ใน `docs/handoffs/04-claude-to-opencode.md` + `docs/fe-be-contract-check.md` |
 | L3 | สร้างอีเมลนามแฝงบัญชีแยก (display name `xA0Mz`) · ทดสอบส่งหาตัวเอง · ใส่แทน `demo@example.com` ใน PROFILE | human | P0 | ก่อน ship | D8 · #6 · หน้า Contact อ่านจาก PROFILE อัตโนมัติ · ตอนนี้แสดง `demo@example.com` (เจ้าของสั่ง) |
 | L8 | `playwright/smoke.spec.ts` ยังคาดฟอร์ม Contact (Name/Email/Message) → ขัดกับ D8 | Claude | P1 | Lab 06 QA | พบใน Lab 04 · ไม่อยู่ใน `npm test` |
 | L9 | อ่านทวนถ้อยคำ case study 4 bullet ใน About · ตัดสินข้อตีความ D10 (ซ่อนปุ่มรองบน Home ตอนปิด) | human | P1 | ก่อน merge PR #13 | D3 · D5 · D10 · #2 |
@@ -22,6 +21,7 @@ Last updated: 2026-09-25 14:40 +07:00
 | L1 | สร้าง STATUS + OPEN_LOOPS จาก example | 2026-09-25 |
 | L2 | git noreply + แก้ author ของ commit ที่ยังไม่ push ก่อน push ครั้งแรก | 2026-09-25 |
 | L4 | D12 parser + test | 2026-09-25 (PR #13) |
+| L5 | Guestbook API + `/api/contact` 410 + error ปลอดภัย + rate limit + ขั้นตอนลบโพสต์ | 2026-09-25 (Lab 05 · `docs/guestbook-delete.md`) |
 
 ## กฎสั้น
 

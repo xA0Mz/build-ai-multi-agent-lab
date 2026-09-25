@@ -1,6 +1,7 @@
 /**
- * SQLite helpers for contact + guestbook.
- * Lab 05 (OpenCode) implements persistence. Stubs return null until finishe.
+ * SQLite helpers for contact + guestbook (D8 · D9 · D11).
+ * Connection is cached at module level — change DATA_DIR, then call getDb()
+ * after deleting the cache if you need a re-init (see tests/labs/lab05-api.test.ts).
  */
 import Database from 'better-sqlite3';
 import { mkdirSync } from 'node:fs';
@@ -46,24 +47,89 @@ export function getDb(): Database.Database {
   return db;
 }
 
-/** Stub: Lab 05 must implement validation + insert. */
-export function insertContact(_input: {
+// Limits per D9 (guestbook) — contact limits are provisional until a form opens.
+const GUESTBOOK_NAME_MAX = 80;
+const GUESTBOOK_MESSAGE_MAX = 500;
+const CONTACT_NAME_MAX = 100;
+const CONTACT_EMAIL_MAX = 254;
+const CONTACT_MESSAGE_MAX = 2000;
+
+/**
+ * Error messages thrown here must stay safe for a public audience (D11):
+ * short codes only — no paths, no stack, no internal wording.
+ */
+function trimField(value: unknown): string | null {
+  return typeof value === 'string' ? value.trim() : null;
+}
+
+export function insertContact(input: {
   name: string;
   email: string;
   message: string;
 }): ContactMessage {
-  throw new Error('NOT_IMPLEMENTED: insertContact — Lab 05 OpenCode');
+  const name = trimField(input?.name);
+  const email = trimField(input?.email);
+  const message = trimField(input?.message);
+  if (
+    !name ||
+    name.length > CONTACT_NAME_MAX ||
+    !email ||
+    email.length > CONTACT_EMAIL_MAX ||
+    !email.includes('@') ||
+    !message ||
+    message.length > CONTACT_MESSAGE_MAX
+  ) {
+    throw new Error('VALIDATION_ERROR');
+  }
+  try {
+    const database = getDb();
+    const info = database
+      .prepare('INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)')
+      .run(name, email, message);
+    const row = database
+      .prepare('SELECT id, name, email, message, created_at FROM contact_messages WHERE id = ?')
+      .get(Number(info.lastInsertRowid)) as ContactMessage | undefined;
+    if (!row) throw new Error('DB_ERROR');
+    return row;
+  } catch (err) {
+    if (err instanceof Error && err.message === 'VALIDATION_ERROR') throw err;
+    throw new Error('DB_ERROR');
+  }
 }
 
-/** Stub: Lab 05 must implement. */
+/** Newest first — the guestbook UI prepends new entries visually. */
 export function listGuestbook(): GuestbookEntry[] {
-  throw new Error('NOT_IMPLEMENTED: listGuestbook — Lab 05 OpenCode');
+  try {
+    const rows = getDb()
+      .prepare('SELECT id, name, message, created_at FROM guestbook ORDER BY id DESC')
+      .all() as GuestbookEntry[];
+    return rows;
+  } catch {
+    throw new Error('DB_ERROR');
+  }
 }
 
-/** Stub: Lab 05 must implement. */
-export function insertGuestbook(_input: {
+export function insertGuestbook(input: {
   name: string;
   message: string;
 }): GuestbookEntry {
-  throw new Error('NOT_IMPLEMENTED: insertGuestbook — Lab 05 OpenCode');
+  const name = trimField(input?.name);
+  const message = trimField(input?.message);
+  if (!name || name.length > GUESTBOOK_NAME_MAX || !message || message.length > GUESTBOOK_MESSAGE_MAX) {
+    throw new Error('VALIDATION_ERROR');
+  }
+  try {
+    const database = getDb();
+    const info = database
+      .prepare('INSERT INTO guestbook (name, message) VALUES (?, ?)')
+      .run(name, message);
+    const row = database
+      .prepare('SELECT id, name, message, created_at FROM guestbook WHERE id = ?')
+      .get(Number(info.lastInsertRowid)) as GuestbookEntry | undefined;
+    if (!row) throw new Error('DB_ERROR');
+    return row;
+  } catch (err) {
+    if (err instanceof Error && err.message === 'VALIDATION_ERROR') throw err;
+    throw new Error('DB_ERROR');
+  }
 }
