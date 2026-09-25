@@ -3,22 +3,24 @@
 > คัดลอกเป็น `docs/STATUS.md` ใน Lab 00 · อ่านทุก session · **สั้น** · single-writer ต่อรอบ  
 > ดู [`COURSE.md`](../COURSE.md) ชั้น State (Hot)
 
-Last updated: 2026-09-25 13:00 +07:00  
+Last updated: 2026-09-25 14:40 +07:00  
 Updated by: Claude
 
 ## Current goal
 
-- ปิด Lab 03 (issues จาก DECISIONS) แล้วเข้า Lab 04 Frontend
+- Lab 05 Backend (OpenCode agent `backend`): guestbook API + `/api/contact` 410 ตาม `docs/handoffs/04-claude-to-opencode.md`
 
 ## Done
 
 - Lab 00 init · Lab 01 `docs/PROFILE.md`
-- Lab 02: debate 5 รอบ (`frontend` = Brand + UX · `reviewer` = Devil) → `docs/DEBATE.md` · `docs/DECISIONS.md` D1–D14 · PROFILE แก้ Headline + Bio ตาม D2/D3 · บันทึก agent memory ของ frontend และ reviewer
-- Lab 03: GitHub issues #1–#7 จาก D1–D14 · FE: #1 (D12) #2 (D4–D6) #3 (D11/D13) #4 (D9/D10 UI) · BE: #5 (guestbook API) · FE+BE: #6 (D8 contact) · docs: #7 (D1–D3/D7) · gh: #8 (draft · เปิดไว้) #9–#12 (ทาง B · ลบแล้ว) · `## Lab 03 — MCP vs gh` + ตาราง issue ใน DECISIONS (commit `1ce792e`) · ตั้ง git email เป็น noreply แล้ว (repo-local)
+- Lab 02: debate 5 รอบ → `docs/DEBATE.md` · `docs/DECISIONS.md` D1–D14 · PROFILE แก้ตาม D2/D3
+- Lab 03: GitHub issues #1–#7 จาก D1–D14 · #8 (gh draft) · ตาราง issue ↔ decision ใน DECISIONS (commit `e7ec61c`)
+- Lab 04 UI: D12 parser + `tests/profile.test.ts` · 5 หน้าทำใหม่โดย agent `frontend` ตาม D4–D15 · palette D15 (Teal) · contract check โดย OpenCode `backend` → `docs/fe-be-contract-check.md` (ไม่มี mismatch ฝั่ง UI) · PR #13 · handoff `docs/handoffs/04-claude-to-opencode.md`
+- L2: แก้ author ของ commit ที่ยังไม่ push ให้เป็น noreply ก่อน push ครั้งแรก (hash เปลี่ยนทั้งหมด · สำรองไว้ใน branch ในเครื่อง `backup/pre-author-reset`)
 
 ## In progress
 
-- —
+- PR #13 รอ review / merge
 
 ## Blocked
 
@@ -26,15 +28,16 @@ Updated by: Claude
 
 ## Next actions
 
-1. เจ้าของตัดสิน: แก้ author ของ commit ที่ยังไม่ push ซึ่งใช้อีเมลส่วนตัว (เช่น `77965fc`) หรือไม่ · แล้ว commit + push DEBATE + PROFILE + agent memory · ลิงก์ DECISIONS ใน issue จะ 404 จนกว่าจะ push
-2. เขียน handoff สัญญา D8/D10 ถึง backend (L5 · อ้าง #5 #6)
-3. Lab 04 เริ่มที่ #1 (D12 parser)
+1. OpenCode `backend`: Lab 05 ตาม handoff 04 · `npm run test:labs` ต้องเขียว
+2. เจ้าของ: อ่านทวนถ้อยคำ case study ใน About (#2) · ตัดสินข้อตีความ D10 (ซ่อนปุ่มรองบน Home ตอนปิด) · แนบ screenshot ใน PR #13
+3. เจ้าของ: สร้างอีเมลนามแฝงแล้วแทน `demo@example.com` ใน PROFILE (L3)
 
 ## Files changed in latest session
 
-- `docs/DECISIONS.md` (ต่อท้าย Lab 03) · `docs/STATUS.md` · `docs/OPEN_LOOPS.md` · GitHub issues #1–#7 (ไม่มีโค้ดเปลี่ยน)
+- `src/lib/profile.ts` · `tests/profile.test.ts` · `src/layouts/BaseLayout.astro` · `src/pages/*.astro` · `docs/DECISIONS.md` (D15) · `docs/fe-be-contract-check.md` · `docs/handoffs/04-claude-to-opencode.md` · `.claude/agent-memory/frontend/*`
 
 ## Notes
 
 - Proposed vs Approved: brainstorm อยู่ใน `DEBATE.md` — สิ่งที่ปิดแล้วอยู่ใน `DECISIONS.md`
-- Latest D-id: **D14**
+- Latest D-id: **D15**
+- Writer รอบถัดไปของ STATUS/OPEN_LOOPS = OpenCode (`backend`)
