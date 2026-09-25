@@ -19,7 +19,7 @@
 | 7 | ส่ง guestbook ผ่าน UI: `Demo QA` / "ทดสอบ E2E จาก Playwright (demo data)" | 201 · ข้อความขอบคุณ · รายการใหม่ขึ้นบนสุด · ฟอร์มล้าง | ✅ POST 201 → GET 200 · แสดง "ขอบคุณที่แวะมาทักทายนะ" · โพสต์ใหม่อยู่บนสุด (ใหม่ก่อน) · ช่องชื่อถูกล้าง |
 | 8 | ส่ง guestbook ข้อความเว้นวรรคล้วน | ถูกกันฝั่ง client · ไม่ยิง API | ✅ แสดง "ใส่ชื่อเล่นและข้อความก่อนนะ" · ไม่มี POST ใน network log |
 | 9 | POST `/api/guestbook` message 501 ตัว | 400 · error ปลอดภัย (D11) | ✅ 400 `{"error":"INVALID_INPUT"}` — ไม่มี stack / SQL |
-| 10 | ส่ง guestbook ที่มี HTML: `Demo <b>QA</b>` / `<i>escape check</i> & demo` | แสดงเป็นข้อความ ไม่ render tag | ✅ render เป็น `&lt;b&gt;…` · ไม่มี `<b>`/`<i>` ใน DOM ของรายการ (escape ก่อน `innerHTML` ทำงาน) |
+| 10 | ส่ง guestbook ที่มี HTML: `Demo <b>QA</b>` / `<i>escape check</i> & demo` | แสดงเป็นข้อความ ไม่ render tag | ✅ render เป็น `&lt;b&gt;…` · ไม่มี `<b>`/`<i>` ใน DOM ของรายการ (`guestbook.astro` render ด้วย `textContent` · ไม่ใช้ `innerHTML` — แก้ถ้อยคำตามรีวิว Lab 07 Nit #10) |
 | 11 | เปิด URL ที่ไม่มี (`/no-such-page`) | 404 | ⚠️ 404 ถูกต้องแต่เป็นหน้า default ของ Astro ("404: Not Found") — ตรงกับ L12 ที่ค้างอยู่ |
 | 12 | Console errors | ไม่มี error นอกจากที่ตั้งใจยิง | ✅ error 3 รายการ = 404 (ข้อ 11) · 410 (ข้อ 5) · 400 (ข้อ 9) ที่ตั้งใจเอง · ไม่มี JS error |
 | 13 | Screenshot | ≥ 2 หน้า ใน `docs/screenshots/` | ✅ `home.png` · `guestbook-after-submit.png` · `contact.png` (full page) |
