@@ -3,13 +3,12 @@
 > คัดลอกเป็น `docs/OPEN_LOOPS.md` ใน Lab 00 · งานค้างที่ยังไม่ปิด · ลบแถวเมื่อเสร็จ  
 > Owner = `Claude` | `OpenCode` | `human`
 
-Last updated: 2026-09-25 15:25 +07:00
+Last updated: 2026-09-25 15:20 +07:00
 
 | ID | Task | Owner | Priority | Trigger / due | Notes |
 |---|---|---|---|---|---|
 | L3 | สร้างอีเมลนามแฝงบัญชีแยก (display name `xA0Mz`) · ทดสอบส่งหาตัวเอง · ใส่แทน `demo@example.com` ใน PROFILE | human | P0 | ก่อน ship | D8 · #6 · หน้า Contact อ่านจาก PROFILE อัตโนมัติ · ตอนนี้แสดง `demo@example.com` (เจ้าของสั่ง) |
 | L8 | `playwright/smoke.spec.ts` ยังคาดฟอร์ม Contact (Name/Email/Message) → ขัดกับ D8 | Claude | P1 | Lab 06 QA | พบใน Lab 04 · ไม่อยู่ใน `npm test` |
-| L11 | rate limit: ใช้ `clientAddress` ของ Astro หรือค่าท้ายของ `x-forwarded-for` ที่ proxy เติม แทนค่าตัวแรก (ตอนนี้ไม่มี header = ทุกคนแชร์ bucket `unknown` · ปลอมได้) · ลบ key ที่หมดอายุ · honeypot `website` ที่ไม่ใช่ string ต้องถูกทิ้งด้วย | OpenCode | P0 | ก่อนเปิด PR Lab 05 (เจ้าของเลือก) | D9 · พบใน `docs/be-fe-integration-check.md` |
 | L12 | หน้า `src/pages/404.astro` ภาษาไทยตามโทนเว็บ (ตอนนี้ขึ้น 404 default ของ Astro) | Claude | P2 | Lab 06 | D11 · D13 |
 | L9 | อ่านทวนถ้อยคำ case study 4 bullet ใน About · ตัดสินข้อตีความ D10 (ซ่อนปุ่มรองบน Home ตอนปิด) | human | P1 | ก่อน ship | D3 · D5 · D10 · #2 |
 | L6 | เพิ่ม `src/lib/profile.ts` ในตาราง Ownership (`AGENTS.md` / `CLAUDE.md`) = Claude frontend | human | P2 | — | D12 |
@@ -24,6 +23,7 @@ Last updated: 2026-09-25 15:25 +07:00
 | L2 | git noreply + แก้ author ของ commit ที่ยังไม่ push ก่อน push ครั้งแรก | 2026-09-25 |
 | L4 | D12 parser + test | 2026-09-25 (PR #13) |
 | L5 | Guestbook API + `/api/contact` 410 + error ปลอดภัย + rate limit + ขั้นตอนลบโพสต์ | 2026-09-25 (Lab 05 · `docs/guestbook-delete.md`) |
+| L11 | rate limit key (XFF ค่าท้าย / `clientAddress` · ไม่มี bucket ร่วม) + sweep key หมดอายุ + honeypot non-string | 2026-09-25 (`docs/handoffs/05-opencode-to-claude-l11.md`) |
 
 ## กฎสั้น
 

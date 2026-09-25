@@ -22,24 +22,44 @@ function isGuestbookClosed(): boolean {
  * Best-effort rate limit per D9 — in-memory, per instance (resets on restart
  * and is not shared across replicas). Enough to blunt drive-by spam; not a
  * hard guarantee.
+ *
+ * Key choice (L11): behind a reverse proxy (Coolify/Traefik) the LAST entry
+ * of x-forwarded-for is the one the trusted proxy appended — earlier entries
+ * are client-controlled and spoofable. Direct node access has no XFF, so we
+ * fall back to Astro's clientAddress (socket peer). If neither exists we do
+ * NOT fall back to one shared bucket — that would lock the whole site behind
+ * a single limit — and skip limiting instead (best-effort trade-off).
  */
 const RATE_LIMIT_MAX_POSTS = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const postHits = new Map<string, number[]>();
 
-function clientKey(request: Request): string {
+function clientKey(request: Request, clientAddress: string | undefined): string | null {
   const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0]?.trim() || 'unknown';
-  return 'unknown';
+  if (forwarded) {
+    const hops = forwarded.split(',').map((h) => h.trim()).filter(Boolean);
+    const proxyAppended = hops[hops.length - 1];
+    if (proxyAppended) return proxyAppended;
+  }
+  if (clientAddress) return clientAddress;
+  return null;
 }
 
-function isRateLimited(request: Request): boolean {
-  const key = clientKey(request);
+function isRateLimited(request: Request, clientAddress: string | undefined): boolean {
+  const key = clientKey(request, clientAddress);
+  if (!key) return false;
   const now = Date.now();
-  const hits = (postHits.get(key) ?? []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  postHits.set(key, hits);
+  // Sweep expired keys on every recorded request so the map cannot grow
+  // unbounded when clients (or spoofed headers) never repeat.
+  for (const [k, times] of postHits) {
+    const alive = times.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+    if (alive.length === 0) postHits.delete(k);
+    else postHits.set(k, alive);
+  }
+  const hits = postHits.get(key) ?? [];
   if (hits.length >= RATE_LIMIT_MAX_POSTS) return true;
   hits.push(now);
+  postHits.set(key, hits);
   return false;
 }
 
@@ -56,9 +76,9 @@ export const GET: APIRoute = async () => {
   }
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (isGuestbookClosed()) return jsonResponse(503, { error: 'GUESTBOOK_CLOSED' });
-  if (isRateLimited(request)) return jsonResponse(429, { error: 'RATE_LIMITED' });
+  if (isRateLimited(request, clientAddress)) return jsonResponse(429, { error: 'RATE_LIMITED' });
 
   let body: unknown;
   try {
@@ -71,10 +91,13 @@ export const POST: APIRoute = async ({ request }) => {
   }
   const { name, message, website } = body as Record<string, unknown>;
 
-  // Honeypot (D9): humans leave "website" empty. Bots that fill it are
-  // dropped silently with 201 (no insert) — the UI only checks res.ok.
-  if (typeof website === 'string' && website.trim() !== '') {
-    return jsonResponse(201, { ok: true });
+  // Honeypot (D9 · L11): humans leave "website" empty. Any value that is not
+  // an absent field or a blank string — including non-string values such as
+  // `"website": 1` — is a bot: dropped silently with 201 (no insert). The UI
+  // only checks res.ok.
+  if (website !== undefined) {
+    const blankString = typeof website === 'string' && website.trim() === '';
+    if (!blankString) return jsonResponse(201, { ok: true });
   }
   if (typeof name !== 'string' || typeof message !== 'string') {
     return jsonResponse(400, { error: 'INVALID_INPUT' });
