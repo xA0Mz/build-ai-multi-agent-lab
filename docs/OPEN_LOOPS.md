@@ -3,7 +3,7 @@
 > คัดลอกเป็น `docs/OPEN_LOOPS.md` ใน Lab 00 · งานค้างที่ยังไม่ปิด · ลบแถวเมื่อเสร็จ  
 > Owner = `Claude` | `OpenCode` | `human`
 
-Last updated: 2026-09-25 16:40 +07:00
+Last updated: 2026-09-25 17:00 +07:00
 
 | ID | Task | Owner | Priority | Trigger / due | Notes |
 |---|---|---|---|---|---|
@@ -13,6 +13,7 @@ Last updated: 2026-09-25 16:40 +07:00
 | L13 | ตอน deploy ตรวจว่า proxy (Coolify/Traefik) **append** `x-forwarded-for` และ app เข้าถึงตรงโดยไม่ผ่าน proxy ไม่ได้ — ไม่งั้นค่าท้ายปลอมได้ rate limit เลี่ยงได้ | human | P1 | Lab 08 | D9 · L11 · `docs/handoffs/05-opencode-to-claude-l11.md` · ยกเป็น P1 ตามรีวิว Lab 07 (S1) |
 | L16 | follow-up รีวิว PR #14: S1 เลือกเชื่อ XFF ผ่าน env (`TRUST_PROXY_HOPS`) · S2 จำกัด body ~4 KB → 413 (อ่านแบบ stream ใน `guestbook.ts` · กัน chunked) · S3 `LIMIT` ใน `listGuestbook` · S4 route test ใน `npm test` · + Nit ฝั่ง `src/` | OpenCode | P1 | ก่อน Lab 08 | `docs/review-claude.md` Round 2 · `docs/review-opencode-rebuttal.md` · S1/S2/S4 เสนอเป็น ship gate (รอ L17) |
 | L17 | เจ้าของตัดสิน: (1) ownership `astro.config.mjs` (reviewer เสนอ = backend · ออก D-id ใหม่) (2) รับ S1/S2/S4 เป็น ship gate Lab 08 ไหม (3) topology deploy: มี CDN/`cloudflared` ไหม · เปิด port 4321 ตรงไหม → ค่า `TRUST_PROXY_HOPS` | human | P1 | ก่อน Lab 08 | ผูก L13 · L16 |
+| L15 | ลบแถวทดสอบ QA id 7–8 ใน `data/site.sqlite` ของเครื่อง (สิทธิ์ถูกปฏิเสธตอนรัน) — ใช้คำสั่งใน `docs/guestbook-delete.md` | human | P2 | ก่อน demo | Lab 06 · `docs/QA.md` ข้อสังเกต · ไม่กระทบ production (`data/` ถูก gitignore) |
 | L9 | อ่านทวนถ้อยคำ case study 4 bullet ใน About · ตัดสินข้อตีความ D10 (ซ่อนปุ่มรองบน Home ตอนปิด) | human | P1 | ก่อน ship | D3 · D5 · D10 · #2 |
 | L6 | เพิ่ม `src/lib/profile.ts` ในตาราง Ownership (`AGENTS.md` / `CLAUDE.md`) = Claude frontend | human | P2 | — | D12 |
 | L7 | (ไม่บังคับ) rename repo หรือทำเป็น private เพื่อลดร่องรอยว่ามาจาก template | human | P2 | ก่อน ship | D6 |
