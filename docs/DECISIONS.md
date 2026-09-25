@@ -55,3 +55,27 @@
 - สัญญาของ `GUESTBOOK_ENABLED` (D10) และ `/api/contact` → 404/410 (D8) อยู่ใน handoff ถึง backend แล้ว เพื่อให้ UI ที่ทำใน Lab 04 ตรงกับ API ของ Lab 05
 - ข้อความบนเว็บใช้ microcopy ตาม D13 · ไม่มีข้อความภายในตามรายการ D11 (ตรวจทั้ง markup และ `description` / `FALLBACK`) · leak-guard test ผ่าน
 - Home มี `xA0Mz` + Headline + ปุ่มหลักไป `/about#case-study` + ปุ่มรอง Guestbook · About มี case study 3–4 bullet ที่เป็นข้อเท็จจริงล้วน + ลิงก์ GitHub profile · ไม่มี section ว่าง (D4 · D5 · D6)
+
+## Lab 03 — MCP vs gh
+
+> สร้าง issue จาก DECISIONS ผ่าน GitHub MCP (#1–#7) และผ่าน `gh` CLI (#8–#12) · 2026-09-25
+
+- **ความเร็ว:** MCP อ่าน DECISIONS แล้วสร้าง 7 issue พร้อม body ยาว (เกณฑ์ผ่าน + checklist + owner) ได้ในรอบเดียว โดยยิงพร้อมกันหลาย call · `gh` เร็วกว่าสำหรับ issue เดี่ยวที่ body สั้น (#8 ใช้คำสั่งเดียว) แต่ถ้า body ยาวต้องเตรียมไฟล์ `--body-file` ก่อน ซึ่งทาง B ต้องให้ `claude -p` ร่างแยกทีละ decision
+- **สิทธิ์:** MCP ใช้ PAT จาก `.env` ผ่าน `.mcp.json` (fine-grained · repo เดียว · scope Issues) และตอนรัน headless จำกัดได้ด้วย `--allowedTools "mcp__github"` · `gh` ใช้ OAuth token ใน keyring ซึ่ง scope กว้างกว่า (`repo`, `workflow`, `gist`, `read:org`) → งานที่ให้ agent ทำเองควรใช้ MCP + PAT แคบ · ห้ามใส่ token ใน issue หรือ docs ทั้งสองทาง
+- **Audit trail:** บน GitHub ทั้งสองทางแสดงผู้สร้างเป็น `xA0Mz` เหมือนกัน ดูจากหน้า issue ไม่ออกว่ามาจากทางไหน · หลักฐานว่าใช้ MCP อยู่ใน transcript ของ Claude (tool call `issue_write`) ส่วน `gh` อยู่ใน shell history · ร่องรอยที่อ่านได้ข้ามคนและข้าม CLI จึงต้องเป็นตาราง issue # ในไฟล์นี้ (ด้านล่าง)
+- **ข้อผิดพลาดที่เจอ:** ไม่เจอ 401 ทั้งสองทาง · issue จาก `gh` ที่ใช้ title ตัวอย่างใน README (#9–#12) ใช้เลข D ของคอร์ส **ไม่ตรงกับ DECISIONS ของ repo นี้** (เช่น `[D2] Guestbook scope` แต่ D2 ของเราคือ Headline · `[D3] Theme color` แต่ D3 คือคำเคลมใน Bio) และซ้ำกับ #2 / #7 · ลิงก์ `docs/DECISIONS.md` ใน body ขึ้น 404 จนกว่าจะ push · repo ไม่มี label `docs` ต้องใช้ `documentation`
+- **เมื่อไหร่ใช้อะไร:** MCP = แปลงเอกสารเป็นหลาย issue ที่ body มีโครงสร้าง หรือให้ agent ทำจบใน session · `gh` = ตรวจผล (`gh issue list`), issue เดี่ยวแบบเร็ว, สคริปต์ที่รันซ้ำได้ (`npm run create-issues`), ปิด duplicate · ทั้งสองทางต้อง list/search issue ก่อนสร้าง และตั้ง title จาก D-id ในไฟล์นี้ ไม่ใช่จากตัวอย่าง
+
+### Issue ↔ Decision
+
+| Issue # | Title (ย่อ) | มาจาก Decision | สร้างผ่าน | Owner |
+|---|---|---|---|---|
+| #1 | Parser profile.ts หลายบรรทัด + whitelist + interestDetails | D12 | MCP | Frontend |
+| #2 | Home CTA แบบ B + case study + ที่มาของเว็บ | D4 · D5 · D6 | MCP | Frontend |
+| #3 | ลบข้อความภายใน + microcopy + error ปลอดภัย | D11 · D13 | MCP | Frontend |
+| #4 | Guestbook UI: render ปลอดภัย + honeypot + kill switch | D9 · D10 | MCP | Frontend |
+| #5 | Guestbook API: validate + rate limit + kill switch | D9 · D10 · D11 | MCP | Backend |
+| #6 | Contact v1: mailto นามแฝง + ปิด `/api/contact` | D8 | MCP | Frontend + Backend |
+| #7 | เก็บงาน PROFILE + git noreply | D1 · D2 · D3 · D7 | MCP | Claude + human |
+| #8 | Draft compare gh | — (ฝึกหัด) | gh | รอปิด |
+| #9–#12 | title ตามตัวอย่างในคอร์ส | เลข D ไม่ตรง · ซ้ำกับ #2 / #7 | gh | รอเจ้าของตัดสิน: ปิด duplicate หรือแก้ title |
