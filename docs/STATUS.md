@@ -22,7 +22,7 @@ Updated by: Claude
 
 ## In progress
 
-- Lab 05 ขั้นที่ 5: push `lab-05-backend` + เปิด PR Backend (PR #13 ของ Lab 04 merge แล้ว)
+- L11 (OpenCode `backend`): แก้ rate limit key + honeypot ตาม `docs/handoffs/05-claude-to-opencode-l11.md` ก่อนเปิด PR Backend (เจ้าของเลือก)
 
 ## Blocked
 
@@ -30,8 +30,8 @@ Updated by: Claude
 
 ## Next actions
 
-1. push `lab-05-backend` + เปิด PR Backend (Closes #5 · Refs #6)
-2. OpenCode `backend`: rate limit key + honeypot ที่ไม่ใช่ string (L11) ก่อน ship
+1. OpenCode `backend`: L11 ตาม handoff `05-claude-to-opencode-l11.md`
+2. หลัง L11: push `lab-05-backend` + เปิด PR Backend (Closes #5 · Refs #6)
 3. Claude: Lab 06 QA ตาม `docs/handoffs/05-opencode-to-claude.md` · แก้ `playwright/smoke.spec.ts` (L8) · ชื่อ error body จริงดูใน `docs/be-fe-integration-check.md`
 4. เจ้าของ: อ่านทวน case study (#2 · L9) · อีเมลนามแฝง (L3)
 
@@ -43,5 +43,5 @@ Updated by: Claude
 
 - Proposed vs Approved: brainstorm อยู่ใน `DEBATE.md` — สิ่งที่ปิดแล้วอยู่ใน `DECISIONS.md`
 - Latest D-id: **D15**
-- Writer ของ STATUS/OPEN_LOOPS ตอนนี้ = Claude (รับจาก handoff 05)
+- Writer รอบถัดไปของ STATUS/OPEN_LOOPS = OpenCode (`backend`) · ตาม handoff `05-claude-to-opencode-l11.md`
 - Verify ของรอบนี้: `npm run test:labs` เขียว (2) · `npm test` เขียว (11) · `npm run build` ผ่าน · curl สลับ `GUESTBOOK_ENABLED` ครบทั้ง GET/POST/410/400/429/503 (ดู handoff 05)
