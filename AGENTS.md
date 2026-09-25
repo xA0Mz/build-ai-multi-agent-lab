@@ -1,80 +1,86 @@
-# Agents — Build AI Multi-Agent Lab (V4) · seed
+# Agents — Build AI Multi-Agent Lab (V4)
 
-กติการ่วมสำหรับ **Claude Code** และ **OpenCode**  
-สินค้า = เว็บ personal branding (Astro) ใน root นี้
+กติการ่วมสำหรับ **Claude Code** และ **OpenCode** (`CLAUDE.md` ทำ `@AGENTS.md` — ไฟล์นี้ต้องพอสำหรับทั้งสอง CLI)  
+สินค้า = เว็บ personal branding (Astro SSR) ใน root นี้ · ภาษาเอกสาร = ไทยปนอังกฤษ
 
-หลัง Lab 00: `/init` แล้ว **merge** — อย่าลบ Ownership / สี่เสา / Native harness
+## คำสั่ง (ตรวจแล้วจาก `package.json`)
+
+```powershell
+npm install        # Node >=22.12.0 จำเป็น · template ไม่มี node_modules
+npm run dev        # Astro dev บน 127.0.0.1:4321
+npm test           # vitest — tests/** เท่านั้น (ไม่รวม tests/labs)
+npm run test:labs  # vitest.labs.config.ts — tests/labs/** เท่านั้น
+npm run test:e2e   # Playwright — testDir ./playwright · ต้องรัน dev server ก่อน (baseURL 127.0.0.1:4321, ทับด้วย PLAYWRIGHT_BASE_URL)
+npm run build && npm start   # start = node dist/server/entry.mjs — ต้อง build ก่อนเสมอ
+node scripts/create-course-issues.mjs   # = npm run create-issues
+```
+
+- **`test:labs` ต้อง RED ตอนเทมเพลตสด** — stub ใน `src/lib/db.ts` (`insertContact` / guestbook) โยน `NOT_IMPLEMENTED` จงใจ รอ Lab 05 (OpenCode) implement อย่า "แก้ให้ผ่าน" นอก Lab 05
+- ไม่มี lint/typecheck script แยก — verification = `npm test` + `npm run test:labs`
+
+## สถาปัตยกรรม / gotchas
+
+- **Astro SSR ไม่ใช่ static** — `output: 'server'` + `@astrojs/node` standalone (`astro.config.mjs`) · dev ล็อกพอร์ต 4321
+- **SQLite ผ่าน `DATA_DIR`** (default `./data`) สร้างเองตอนรัน · `src/lib/db.ts` cache connection ไว้ระดับ module — แก้ `DATA_DIR` หลัง import แล้วต้องเรียก `getDb()` ให้ re-init ตามแบบ `tests/labs/lab05-api.test.ts`
+- **Leak-guard test** (`tests/public-site.test.ts`): ห้ามมีคำ "Lab/แล็บ" ใน markup ที่ render (`*.astro`/`*.html` ใน `src/`) — ผู้ชมต้องเห็นเว็บส่วนตัว ไม่ใช่ scaffold คอร์ส · อ้าง Lab ได้เฉพาะคอมเมนต์โค้ด / PR / docs
+- ไฟล์ config บางตัวมาเป็น **`.example`** — ต้อง copy ใน Lab 00: `.env.example → .env` · `opencode.json.example → opencode.json` · `.mcp.json.example → .mcp.json` · `docs/STATUS.md.example → docs/STATUS.md` · `docs/OPEN_LOOPS.md.example` เช่นกัน
+- `package.json` มี `allowScripts` (esbuild + better-sqlite3) — native build ต้องอนุญาต อย่าลบ
+- `SITE_URL` ใน `.env` กำหนด `site` ของ Astro config ด้วย
+
+## หลัง Lab 00: `/init` แล้ว **merge** — อย่าลบ Ownership / สี่เสา / Native harness
 
 ## สี่เสาหลัก
 
-1. **Multi-Agent** — หน้าที่และความจำแยก (ไฟล์ใน `.claude/agents/`, `.opencode/agents/` + คนละ CLI)  
-2. **Sub-Agent** — spawn ใช้แล้วทิ้ง; สิ่งที่ต้องจำต่อ = เขียนลง `docs/` เท่านั้น  
-3. **การประสานงาน** — handoff ผ่าน docs / issues / PR / review สำคัญกว่าแชทเดียว  
+1. **Multi-Agent** — หน้าที่และความจำแยก (`.claude/agents/`, `.opencode/agents/` + คนละ CLI)
+2. **Sub-Agent** — spawn ใช้แล้วทิ้ง; สิ่งที่ต้องจำต่อ = เขียนลง `docs/` เท่านั้น
+3. **การประสานงาน** — handoff ผ่าน docs / issues / PR / review สำคัญกว่าแชท
 4. **Swarm** — หลายตัวได้; **เพดาน 20 turns** แล้วหยุดสรุปช่องว่าง (Lab 05b)
 
-ใช้ skill **`public-site-safe`** ทุกงาน implement / swarm / ship
+ใช้ skill **`public-site-safe`** (มีทั้งใน `.claude/skills/` และ `.opencode/skills/`) ทุกงาน implement / swarm / ship
 
-## สี่ชั้นความรู้ (อ่านก่อนลงมือ)
+## Start-of-session (≤ 8 บรรทัด)
 
-| ชั้น | ไฟล์หลัก |
-|---|---|
-| Rules | ไฟล์นี้ · `CLAUDE.md` · skill `public-site-safe` |
-| Context | `COURSE.md` · `docs/PROFILE.md` · `docs/DECISIONS.md` |
-| State (Hot) | `docs/STATUS.md` · `docs/OPEN_LOOPS.md` |
-| Artifacts | `src/` · tests · `docs/QA.md` · PR |
+1. อ่าน `docs/STATUS.md` + `docs/OPEN_LOOPS.md` (ยังไม่มี = copy จาก `.example`)
+2. มี handoff ล่าสุดใน `docs/handoffs/` ที่ส่งถึงคุณ — อ่านด้วย (template: `docs/handoffs/TEMPLATE.md`)
+3. สรุป: Current goal · Latest D-id · Open loops · Blockers — ไม่เกิน 8 บรรทัด
+4. ข้อมูลขัดแย้งระหว่างไฟล์ — หยุดวิเคราะห์ก่อนแก้โค้ด
+5. **ห้าม**สมมุติสิ่งที่เกิดในแชทอีกฝั่ง ถ้าไม่มีเขียนใน `docs/`
 
-**Hot / Warm / Cold:** Hot = STATUS + OPEN_LOOPS + handoff ล่าสุด · Warm = PROFILE/DECISIONS/Ownership · Cold = `_cli-*` / logs เก่า  
-**Proposed vs Approved:** `DEBATE.md` = ยังไม่ปิด · `DECISIONS.md` = อนุมัติแล้วเท่านั้น
+จบงานที่เปลี่ยนสถานะ → อัปเดต STATUS / OPEN_LOOPS · สลับ harness → เขียน handoff
 
-### Start-of-session (≤ 8 บรรทัด)
+## Single-writer + Ownership
 
-ก่อนเริ่มงานทุกครั้ง:
-
-1. อ่าน `docs/STATUS.md` และ `docs/OPEN_LOOPS.md`
-2. ถ้ามี handoff ล่าสุดใน `docs/handoffs/` ที่ส่งถึงคุณ — อ่านด้วย
-3. สรุปให้คนดู: Current goal · Latest D-id (ถ้ามี) · Open loops · Blockers — **ไม่เกิน 8 บรรทัด**
-4. ถ้าข้อมูลขัดแย้งระหว่างไฟล์ — หยุดวิเคราะห์ก่อนแก้โค้ด
-5. **ห้าม**สมมุติว่าคุณรู้สิ่งที่เกิดในแชทของ CLI อีกฝั่ง ถ้าไม่มีเขียนใน `docs/`
-
-จบงานที่เปลี่ยนสถานะ: อัปเดต `STATUS.md` / `OPEN_LOOPS.md` (และ handoff ถ้าสลับ harness)
-
-### Single-writer (ไฟล์ร่วมมีคนเขียนคนเดียวต่อรอบ)
-
-- `docs/STATUS.md` และ `docs/OPEN_LOOPS.md` มี **writer คนเดียวต่อรอบ** — สลับ Claude ↔ OpenCode หลัง commit หรือหลังเขียน handoff
-- Ownership โค้ดตามตารางด้านล่าง — reviewer อ่านอย่างเดียวจนกว่าจะโอนงานชัดใน handoff
-- อย่าให้สอง agent แก้ไฟล์เดียวกันพร้อมกันโดยไม่แยก branch
-
-## Ownership
+- `docs/STATUS.md` / `docs/OPEN_LOOPS.md` — **writer คนเดียวต่อรอบ** สลับ Claude ↔ OpenCode หลัง commit หรือหลังเขียน handoff
+- `DEBATE.md` = proposed (ยังไม่ปิด) · `DECISIONS.md` = approved เท่านั้น
+- reviewer อ่านอย่างเดียวจนกว่า handoff จะโอนงานชัด
 
 | Artifact | Owner |
 |---|---|
-| UI (`src/pages/*.astro`, `src/layouts/`, styles) | Claude · agent `frontend` |
+| UI (`src/pages/*.astro`, `src/layouts/`) | Claude · agent `frontend` |
 | API + SQLite (`src/lib/db.ts`, `src/pages/api/*`) | OpenCode · agent `backend` |
 | E2E / a11y (`docs/QA.md`) | Playwright MCP + either CLI |
 | Profile / debate docs | Claude (Lab 01–02 · subagents) |
-| Hot state (`STATUS.md` · `OPEN_LOOPS.md`) | ผู้ถืองานรอบนั้น (single-writer) |
-| Handoffs (`docs/handoffs/`) | ผู้ส่งงานก่อนสลับ harness |
-| Review artifacts | Lab 07 · agent `reviewer` (Claude) / OpenCode review |
-| Ship (`docs/SHIP.md`) | Lab 08 |
+| Hot state (STATUS / OPEN_LOOPS) | ผู้ถืองานรอบนั้น |
+| Handoffs | ผู้ส่งงานก่อนสลับ harness |
+| Review / Ship (`docs/SHIP.md`) | Lab 07 / Lab 08 |
 
-## ความจำ
+## Harness persistent memory
 
-| ชนิด | อยู่ที่ | ตัวอย่าง |
-|---|---|---|
-| ร่วม (shared) | `docs/`, git, PR | STATUS, OPEN_LOOPS, PROFILE, DECISIONS, QA, handoffs |
-| แยก (agent-local) | เซสชัน + ไฟล์ agent | frontend ไม่ถือ context backend |
-| **Harness persistent** | Claude / OpenCode native | ดูตารางด้านล่าง — **ห้ามสร้าง memory bus เอง — ใช้ของที่ harness มีให้** |
-| ทิ้งได้ | Sub-Agent รอบเดียว | Brand/UX/Devil หลังจบ Lab 02 |
+| Harness | ใช้อะไร |
+|---|---|
+| Claude Code | `memory: project` → `.claude/agent-memory/<name>/` · auto memory ผ่าน `/memory` |
+| OpenCode | `AGENTS.md` + agent file + **resume session** |
 
-### Harness persistent memory (ตรวจใน Lab 00)
+- ความจำร่วม = `docs/` — สิ่งที่ต้องข้ามคน/CLI ให้เขียนลง docs ไม่ใช่ agent-local memory
+- Adapter (`AGENTS.md` / `CLAUDE.md`) ชี้ไปไฟล์กลางเท่านั้น — **ไม่คัดลอก**เนื้อหา STATUS/DECISIONS ซ้ำ
 
-| เครื่องมือ | ใช้ของอะไร | ตรวจยังไง |
-|---|---|---|
-| Claude Code | `memory: project` บน agent → `.claude/agent-memory/<name>/` · auto memory ผ่าน `/memory` | จำข้ามเซสชัน + มีไฟล์ MEMORY |
-| OpenCode | `AGENTS.md` + agent file + **resume session** | resume เห็นบริบท · เซสชันใหม่ไม่บังคับ recall ปากเปล่า |
+## Call ข้าม harness
 
-ความจำร่วมของคอร์ส (`docs/`) คนละชั้นกับ harness memory — สิ่งที่ต้องโชว์ข้ามคน/CLI ให้เขียนลง docs  
-Adapter (ไฟล์กติกาที่แต่ละ CLI อ่าน — `AGENTS.md` / `CLAUDE.md`) ต้อง**ชี้ไป**ไฟล์กลาง — อย่าคัดลอกเนื้อหา STATUS/DECISIONS ซ้ำใน adapter
+- ฝั่ง OpenCode เรียก `claude -p` · ฝั่ง Claude เรียก `opencode run` (headless one-shot · ท่อ = ไฟล์ใน `docs/`)
+- ฝั่งที่ถูกเรียกเขียนได้**เฉพาะไฟล์รายงาน**ที่ prompt ระบุ (เช่น `docs/review-*.md`) — ห้ามแตะไฟล์ ownership ของผู้เรียก
+- อย่าให้สอง harness เขียน working tree พร้อมกัน — commit ก่อน
+- **ห้าม**สร้างท่อส่งงาน/daemon เอง (JSON bus, loop ถาวร) · MCP = งานผลิต ไม่ใช่ท่อระหว่าง CLI
+- Plugins project scope: superpowers (oh-my-openagent ยังไม่รองรับ OpenCode v2 — ใช้ native agents)
 
 ## Workflow
 
@@ -82,34 +88,11 @@ Adapter (ไฟล์กติกาที่แต่ละ CLI อ่าน �
 00 Init → 01 Interview → 02 Debate → 03 Issues → 04 FE → 05 BE → 05b Swarm(≤20) → 06 QA → 07 Review → 08 Ship
 ```
 
-## Native harness only
-
-harness = ความสามารถถาวรที่ Claude Code / OpenCode มีให้ในตัว (memory, plugin, session) — ใช้ของเดิม ไม่สร้างชั้นเอง
-
-- Plugins project scope: superpowers (oh-my-openagent ยังไม่รองรับ OpenCode v2 — ใช้ native agents)  
-- **Call ข้าม harness ทำได้** — แต่ละตัวยังรันบน harness ตนเอง: ฝั่ง OpenCode เรียก `claude -p` · ฝั่ง Claude เรียก `opencode run` (headless one-shot · ท่อ = ไฟล์ใน `docs/`)  
-- **กติกา call:** ฝั่งที่ถูกเรียกเขียนได้**เฉพาะไฟล์รายงาน**ที่ prompt ระบุ (เช่น `docs/review-*.md`) — ห้ามแตะไฟล์ ownership ของผู้เรียก · อย่าให้สอง harness เขียน working tree พร้อมกัน (commit ก่อน)  
-- ห้ามสร้างระบบส่งข้อความ/สถานะระหว่าง CLI เอง (เช่น ใช้ไฟล์ JSON เป็นท่อส่งงาน) · ห้าม daemon/loop ถาวร  
-- MCP = งานผลิต — **ไม่ใช่**ท่อระหว่างสอง CLI  
-- Swarm หยุดเมื่อ done **หรือ** ครบ **20 turns**
-
-## คำสั่งหลัก
-
-```powershell
-npm install
-npm run dev
-npm test
-npm run test:labs
-npm run build
-npm start
-node scripts/create-course-issues.mjs
-```
-
 ## ห้าม
 
-- Commit `.env`, PAT, Coolify webhook, `node_modules`
+- Commit `.env`, PAT, Coolify webhook, `node_modules` — `.env` จริงมี PAT อยู่ข้างในแล้ว ระวังเป็นพิเศษ
 - เคลม deploy สำเร็จโดยไม่มี URL 200 จริง
-- บังคับ tmux บน Windows
+- บังคับ tmux บน Windows (Agent Teams ใช้ in-process)
 - PR เข้า `Onto-IQ/*` — เข้า learner repo เท่านั้น
 - ปล่อย swarm เกิน 20 turns โดยไม่สรุปหยุด
 

@@ -1,22 +1,37 @@
 ---
 export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { loadProfile } from '../lib/profile';
+import { loadProfile, paragraphs } from '../lib/profile';
+
 const profile = loadProfile();
+const intro = paragraphs(profile.bio)[0] ?? '';
+
+// D10: kill switch read at runtime (never import.meta.env). Only "false" closes it.
+const guestbookEnabled = process.env.GUESTBOOK_ENABLED !== 'false';
 ---
-<BaseLayout title={`${profile.name} · Home`} description={profile.headline}>
-  <section class="card">
-    <p style="margin:0;color:var(--accent);font-weight:700">Personal branding site</p>
-    <h1>{profile.name}</h1>
-    <p style="font-size:1.2rem;color:var(--text)">{profile.headline}</p>
-    <p>{profile.bio}</p>
-    <p><strong>Audience:</strong> {profile.audience}</p>
+<BaseLayout title={`${profile.name} · ${profile.headline}`}>
+  <section class="card hero">
+    <h1><span class="mark">{profile.name}</span></h1>
+    <p class="lead">{profile.headline}</p>
+    {intro && <p>{intro}</p>}
+    <div class="actions">
+      {/* D4: primary = case study · secondary = Guestbook (hidden by D10 when closed) */}
+      <a class="btn" href="/about#case-study">ดูว่าเราทำงานคู่ AI ยังไง</a>
+      {guestbookEnabled && <a class="btn btn-secondary" href="/guestbook">เขียน Guestbook ทักทายกัน</a>}
+    </div>
   </section>
-  <section class="grid">
-    <a class="card" href="/about"><h2>About</h2><p>เรื่องราวและเส้นทาง</p></a>
-    <a class="card" href="/interests"><h2>Interests</h2><p>หัวข้อที่สนใจ</p></a>
-    <a class="card" href="/contact"><h2>Contact</h2><p>ส่งข้อความถึงฉัน</p></a>
-    <a class="card" href="/guestbook"><h2>Guestbook</h2><p>ฝากคำทักทาย</p></a>
+
+  <section class="grid" aria-label="หน้าอื่น ๆ">
+    <a class="card" href="/about"><h2>เกี่ยวกับเรา</h2><p>เรื่องราวและเส้นทาง</p></a>
+    <a class="card" href="/interests"><h2>สิ่งที่สนใจ</h2><p>หัวข้อที่สนใจ</p></a>
+    <a class="card" href="/contact"><h2>ติดต่อ</h2><p>ทักทางไหนได้บ้าง</p></a>
+    <a class="card" href="/guestbook">
+      <h2>Guestbook</h2>
+      <p>{guestbookEnabled ? 'ฝากคำทักทาย' : 'ตอนนี้ปิดรับข้อความชั่วคราว'}</p>
+    </a>
   </section>
 </BaseLayout>
 
+<style>
+  .hero { padding: 2rem 1.75rem; }
+</style>

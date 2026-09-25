@@ -1,14 +1,44 @@
 ---
 export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { loadProfile } from '../lib/profile';
+import { loadProfile, paragraphs } from '../lib/profile';
+
 const profile = loadProfile();
+const bio = paragraphs(profile.bio);
+const github = profile.contact.github;
+
+/*
+ * D5 case study: facts about this site only, each checkable against docs/ in
+ * the repo (DEBATE.md, DECISIONS.md, tests/profile.test.ts). No numbers that
+ * can't be shown, no links to the repo or PRs (D6), no course mention (D6/D11).
+ */
+const caseStudy = [
+  'ชื่อ คำแนะนำตัว และสิ่งที่สนใจบนเว็บนี้ อ่านจากไฟล์โปรไฟล์ไฟล์เดียว แก้ที่เดียวแล้วทุกหน้าเปลี่ยนตาม',
+  'แบ่งหน้าที่ชัดเจน: Claude Code ดูแลหน้าเว็บ ส่วน OpenCode ดูแล API และฐานข้อมูล แต่ละฝั่งแก้เฉพาะไฟล์ของตัวเอง',
+  'ก่อนลงมือเขียนโค้ด ให้ AI สองบทบาทโต้แย้งกันเรื่องแบรนด์ UX และความเสี่ยง แล้วเราเป็นคนตัดสิน ทุกการตัดสินใจถูกบันทึกเป็นข้อ ๆ',
+  'สิ่งที่ได้เรียนรู้: test ผ่านไม่ได้แปลว่าถูก ตัวอ่านโปรไฟล์เคยตัดเนื้อหาเหลือบรรทัดแรกทั้งที่ test ยังผ่าน เราจึงเพิ่ม test ที่ตรวจกับเนื้อหาจริง',
+];
 ---
-<BaseLayout title={`About · ${profile.name}`}>
+<BaseLayout title={`เกี่ยวกับเรา · ${profile.name}`}>
   <article class="card">
-    <h1>About</h1>
-    <p>{profile.bio}</p>
-    <p>เรื่องราวเพิ่มเติม — timeline, skills และลิงก์จะอัปเดตเร็ว ๆ นี้</p>
+    <h1>เกี่ยวกับเรา</h1>
+    {bio.map((p) => <p>{p}</p>)}
+    <p><a href="/contact">ทักทางไหนได้บ้าง</a></p>
   </article>
+
+  <section id="case-study" class="card" aria-labelledby="case-study-title">
+    <h2 id="case-study-title"><span class="mark">เราทำงานคู่ AI ยังไง</span></h2>
+    <p class="lead">เว็บนี้สร้างร่วมกับ Claude Code + OpenCode แบบ multi-agent</p>
+    <ul>
+      {caseStudy.map((item) => <li>{item}</li>)}
+    </ul>
+    {github && (
+      <p><a class="btn btn-secondary" href={github} rel="me">ดูงานบน GitHub</a></p>
+    )}
+  </section>
 </BaseLayout>
 
+<style>
+  #case-study { scroll-margin-top: 1.5rem; }
+  #case-study li + li { margin-top: 0.5rem; }
+</style>

@@ -1,46 +1,208 @@
 ---
 export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadProfile } from '../lib/profile';
+
+/*
+ * API contract this page expects (D9 · D10 · D11) — implemented by backend:
+ *
+ *   GET  /api/guestbook
+ *     200 { entries: { id: number, name: string, message: string, created_at: string }[] }
+ *         created_at = SQLite datetime('now') "YYYY-MM-DD HH:MM:SS" (UTC) or ISO 8601
+ *         kill switch closed → 200 { entries: [] }
+ *     any non-2xx → UI shows a generic message (body is never shown)
+ *
+ *   POST /api/guestbook   content-type: application/json
+ *     body { name: string (trimmed, 1–80), message: string (trimmed, 1–500), website: string }
+ *         `website` = honeypot, must be "" for humans — server should reject or
+ *         silently drop non-empty values; UI does not care which
+ *     201 { id, name, message, created_at }   → UI reloads the list
+ *     400 invalid · 429 rate limited · 503 kill switch closed · 501/5xx
+ *         → all shown as the same generic message; `data.error` is never rendered
+ *
+ * D10 kill switch: read at request time via process.env (never import.meta.env).
+ * Only the exact string "false" closes the guestbook; unset = open.
+ */
+const guestbookEnabled = process.env.GUESTBOOK_ENABLED !== 'false';
+const profile = loadProfile();
 ---
-<BaseLayout title="Guestbook">
+<BaseLayout title={`Guestbook · ${profile.name}`}>
   <section class="card">
     <h1>Guestbook</h1>
-    <p>ฝากข้อความไว้ได้ทางฟอร์มนี้ — อ่าน/เขียนผ่าน <code>/api/guestbook</code></p>
-    <form id="gb-form">
-      <label for="name">Name</label>
-      <input id="name" name="name" required maxlength="80" />
-      <label for="message">Message</label>
-      <textarea id="message" name="message" rows="3" required maxlength="500"></textarea>
-      <p style="margin-top:1rem"><button type="submit">Sign</button></p>
-    </form>
-    <div id="entries" class="card" style="margin-top:1.25rem" aria-live="polite">Loading…</div>
+
+    {guestbookEnabled ? (
+      <>
+        <p>ฝากคำทักทายได้เลย · ไม่ต้องใส่อีเมล · ไม่เกิน 500 ตัวอักษร</p>
+
+        <form id="gb-form" novalidate>
+          <label for="gb-name">ชื่อเล่นหรือนามแฝง (แสดงต่อสาธารณะ)</label>
+          <input id="gb-name" name="name" required maxlength="80" autocomplete="nickname" />
+
+          <label for="gb-message">ข้อความ</label>
+          <textarea id="gb-message" name="message" rows="4" required maxlength="500" aria-describedby="gb-count"></textarea>
+          <p id="gb-count" class="hint">0 / 500</p>
+
+          {/* D9 honeypot: off-screen via CSS, hidden from AT, no tab stop, no autofill */}
+          <div class="hp" aria-hidden="true">
+            <label for="gb-website">เว็บไซต์</label>
+            <input id="gb-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <p class="actions"><button class="btn" type="submit">ลงชื่อ</button></p>
+          <p id="gb-status" role="status" aria-live="polite"></p>
+        </form>
+      </>
+    ) : (
+      <p>ตอนนี้ปิดรับข้อความชั่วคราว — ทักทางอีเมลได้ที่ <a href="/contact">หน้าติดต่อ</a></p>
+    )}
   </section>
+
+  {guestbookEnabled && (
+    <section class="card" aria-labelledby="gb-list-title">
+      <h2 id="gb-list-title">ข้อความจากผู้มาเยือน</h2>
+      <div id="gb-entries" aria-live="polite" aria-busy="true">
+        <p>กำลังโหลด…</p>
+      </div>
+    </section>
+  )}
 </BaseLayout>
+
+<style>
+  .hp {
+    position: absolute !important;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  #gb-status:empty { display: none; }
+  #gb-status { font-weight: 600; color: var(--text); }
+  :global(.gb-list) { list-style: none; padding: 0; margin: 0; }
+  :global(.gb-list li) { border-top: 1px solid var(--border); padding: 0.85rem 0; }
+  :global(.gb-list li:first-child) { border-top: 0; padding-top: 0; }
+  :global(.gb-name) { color: var(--text); }
+  :global(.gb-msg) { margin: 0.25rem 0; white-space: pre-line; overflow-wrap: anywhere; }
+  :global(.gb-time) { font-size: 0.85rem; color: var(--muted); }
+</style>
+
 <script>
-  const entries = document.getElementById('entries');
-  const form = document.getElementById('gb-form');
+  // D9: every API field goes through textContent — no innerHTML with API data.
+  // D11: never render data.error; every failure maps to a fixed message.
+  const MSG = {
+    sendError: 'ตอนนี้ยังส่งไม่ได้ ลองใหม่ภายหลังนะ',
+    loadError: 'ตอนนี้ยังโหลดข้อความไม่ได้ ลองใหม่ภายหลังนะ',
+    empty: 'ยังไม่มีใครเขียนเลย — เป็นคนแรกไหม?',
+    sending: 'กำลังส่ง…',
+    sent: 'ขอบคุณที่แวะมาทักทายนะ',
+    missing: 'ใส่ชื่อเล่นและข้อความก่อนนะ',
+  };
+  const ENDPOINT = '/api/guestbook';
+
+  type Entry = { name?: unknown; message?: unknown; created_at?: unknown };
+
+  const form = document.getElementById('gb-form') as HTMLFormElement | null;
+  const list = document.getElementById('gb-entries');
+  const status = document.getElementById('gb-status');
+  const count = document.getElementById('gb-count');
+  const messageInput = document.getElementById('gb-message') as HTMLTextAreaElement | null;
+
+  const dateFmt = new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+
+  function text(tag: string, value: string, className?: string) {
+    const el = document.createElement(tag);
+    el.textContent = value;
+    if (className) el.className = className;
+    return el;
+  }
+
+  function renderTime(raw: unknown) {
+    const value = typeof raw === 'string' ? raw : '';
+    const el = document.createElement('time');
+    el.className = 'gb-time';
+    // SQLite "YYYY-MM-DD HH:MM:SS" is UTC without a zone marker.
+    const iso = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value) ? `${value.replace(' ', 'T')}Z` : value;
+    const d = new Date(iso);
+    if (value && !Number.isNaN(d.getTime())) {
+      el.dateTime = d.toISOString();
+      el.textContent = dateFmt.format(d);
+    } else {
+      el.textContent = value;
+    }
+    return el;
+  }
+
+  function showMessage(msg: string) {
+    list?.replaceChildren(text('p', msg));
+  }
+
   async function load() {
-    const res = await fetch('/api/guestbook');
-    const data = await res.json();
-    if (!res.ok) {
-      entries.textContent = data.error || `HTTP ${res.status}`;
+    if (!list) return;
+    list.setAttribute('aria-busy', 'true');
+    try {
+      const res = await fetch(ENDPOINT, { headers: { accept: 'application/json' } });
+      if (!res.ok) return showMessage(MSG.loadError);
+      const data = await res.json().catch(() => null);
+      const entries: Entry[] = Array.isArray(data?.entries) ? data.entries : [];
+      if (entries.length === 0) return showMessage(MSG.empty);
+      const ul = document.createElement('ul');
+      ul.className = 'gb-list';
+      for (const e of entries) {
+        const li = document.createElement('li');
+        li.append(
+          text('strong', String(e.name ?? ''), 'gb-name'),
+          text('p', String(e.message ?? ''), 'gb-msg'),
+          renderTime(e.created_at),
+        );
+        ul.append(li);
+      }
+      list.replaceChildren(ul);
+    } catch {
+      showMessage(MSG.loadError);
+    } finally {
+      list.setAttribute('aria-busy', 'false');
+    }
+  }
+
+  messageInput?.addEventListener('input', () => {
+    if (count) count.textContent = `${messageInput.value.length} / 500`;
+  });
+
+  form?.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (!status) return;
+    const fd = new FormData(form);
+    const payload = {
+      name: String(fd.get('name') ?? '').trim().slice(0, 80),
+      message: String(fd.get('message') ?? '').trim().slice(0, 500),
+      website: String(fd.get('website') ?? ''),
+    };
+    if (!payload.name || !payload.message) {
+      status.textContent = MSG.missing;
       return;
     }
-    entries.innerHTML = (data.entries || [])
-      .map((e) => `<p><strong>${e.name}</strong>: ${e.message}<br/><small>${e.created_at}</small></p>`)
-      .join('') || '<p>No entries yet.</p>';
-  }
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const payload = Object.fromEntries(new FormData(form).entries());
-    await fetch('/api/guestbook', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    form.reset();
-    await load();
+    const button = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+    if (button) button.disabled = true;
+    status.textContent = MSG.sending;
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        status.textContent = MSG.sendError;
+        return;
+      }
+      status.textContent = MSG.sent;
+      form.reset();
+      if (count) count.textContent = '0 / 500';
+      await load();
+    } catch {
+      status.textContent = MSG.sendError;
+    } finally {
+      if (button) button.disabled = false;
+    }
   });
+
   load();
 </script>
-

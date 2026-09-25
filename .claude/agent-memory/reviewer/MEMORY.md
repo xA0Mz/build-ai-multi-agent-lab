@@ -1,0 +1,6 @@
+- [Course leak beyond test](review_course-leak-beyond-test.md) — ข้อความคอร์สหลุดทาง frontmatter / FALLBACK / data.error / "คอร์ส" ที่ leak-guard ไม่จับ (D6, D11)
+- [Guestbook safety](review_guestbook-safety.md) — innerHTML, honeypot a11y, kill switch ครอบคลุม UI+API และอ่าน env ตอน runtime (D9, D10)
+- [Unused routes closed](review_unused-routes-closed.md) — เอา UI ออกแล้ว route ต้องปิดจริง 404/410 (D8)
+- [Profile parser whitelist](review_profile-parser-whitelist.md) — whitelist หัวข้อ · Private/Brainstorm ห้ามรั่ว · interests ยังเป็น string[] (D12)
+- [Re-verify repo facts](review_reverify-repo-facts.md) — ตรวจ visibility, อีเมล author (ห้ามพิมพ์), เครื่องมือใน image ใหม่ทุกครั้ง
+- [Verifiable claims](review_verifiable-claims.md) — คำเคลมบนเว็บต้องตรวจได้ · ห้ามคำเด็ดขาดหรือคำเปรียบเทียบที่ไม่มีหลักฐาน (D3, D5)

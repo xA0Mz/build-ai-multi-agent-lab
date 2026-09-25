@@ -1,43 +1,62 @@
 ---
 export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadProfile } from '../lib/profile';
+
+/*
+ * D8 Contact v1: no form. Email comes from PROFILE `## Contact` (owner will
+ * swap demo@example.com for the alias address — no code change needed).
+ * The address is never rendered whole: JS joins the two halves into a mailto,
+ * <noscript> shows "handle [at] domain". No linkedin (D8).
+ */
+const profile = loadProfile();
+const email = profile.contact.email ?? '';
+const at = email.lastIndexOf('@');
+const user = at > 0 ? email.slice(0, at) : '';
+const domain = at > 0 ? email.slice(at + 1) : '';
+const hasEmail = Boolean(user && domain);
+const github = profile.contact.github;
 ---
-<BaseLayout title="Contact">
+<BaseLayout title={`ติดต่อ · ${profile.name}`}>
   <section class="card">
-    <h1>Contact</h1>
-    <p>ฟอร์มนี้โพสต์ไปที่ <code>POST /api/contact</code></p>
-    <form id="contact-form">
-      <label for="name">Name</label>
-      <input id="name" name="name" required maxlength="80" />
-      <label for="email">Email</label>
-      <input id="email" name="email" type="email" required maxlength="120" />
-      <label for="message">Message</label>
-      <textarea id="message" name="message" rows="5" required maxlength="2000"></textarea>
-      <p style="margin-top:1rem"><button type="submit">Send</button></p>
-      <p id="status" role="status" aria-live="polite"></p>
-    </form>
+    <h1>ทักทางไหนได้บ้าง</h1>
+    <p>อยากชวนร่วมงาน หรือแค่อยากคุยเรื่องเว็บ, automation และ AI agents — ทักมาได้เลย</p>
+
+    {hasEmail && (
+      <div class="channel">
+        <h2>อีเมล</h2>
+        <p class="email" data-u={user} data-d={domain}>
+          <noscript>{user} [at] {domain}</noscript>
+        </p>
+      </div>
+    )}
+
+    {github && (
+      <div class="channel">
+        <h2>GitHub</h2>
+        <p><a href={github} rel="me">ดูงานบน GitHub</a></p>
+      </div>
+    )}
+
+    {!hasEmail && !github && (
+      <p><a href="/guestbook">ฝากคำทักทายไว้ที่ Guestbook ได้เลย</a></p>
+    )}
   </section>
 </BaseLayout>
-<script>
-  const form = document.getElementById('contact-form');
-  const status = document.getElementById('status');
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const fd = new FormData(form);
-    const payload = Object.fromEntries(fd.entries());
-    status.textContent = 'Sending…';
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      status.textContent = res.ok ? 'Sent. Thank you!' : `Error: ${data.error || res.status}`;
-      if (res.ok) form.reset();
-    } catch (err) {
-      status.textContent = 'Network error';
-    }
-  });
-</script>
 
+<style>
+  .channel + .channel { margin-top: 1.25rem; }
+  .channel h2 { margin-bottom: 0.25rem; }
+  .email a { font-weight: 700; font-size: 1.1rem; }
+</style>
+
+<script>
+  // D8: build the mailto at runtime so the full address is not in the HTML.
+  for (const el of document.querySelectorAll<HTMLElement>('.email[data-u][data-d]')) {
+    const addr = `${el.dataset.u}@${el.dataset.d}`;
+    const a = document.createElement('a');
+    a.href = `mailto:${addr}`;
+    a.textContent = addr;
+    el.replaceChildren(a);
+  }
+</script>
