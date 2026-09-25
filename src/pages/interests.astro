@@ -2,15 +2,25 @@
 export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { loadProfile } from '../lib/profile';
+
 const profile = loadProfile();
+// D13: card per interest · no description → title only · no placeholder text.
 ---
-<BaseLayout title={`Interests · ${profile.name}`}>
-  <section class="card">
-    <h1>Interests</h1>
-    <ul>
-      {profile.interests.map((item) => <li>{item}</li>)}
-    </ul>
-    <p>อัปเดตรายการสิ่งที่สนใจเร็ว ๆ นี้</p>
-  </section>
+<BaseLayout title={`สิ่งที่สนใจ · ${profile.name}`}>
+  <h1>สิ่งที่เราสนใจ</h1>
+  <ul class="grid interests" role="list">
+    {profile.interestDetails.map((item) => (
+      <li class="card">
+        <h2>{item.title}</h2>
+        {item.description && <p>{item.description}</p>}
+      </li>
+    ))}
+  </ul>
 </BaseLayout>
 
+<style>
+  .interests { list-style: none; padding: 0; margin: 1.25rem 0 0; }
+  .interests .card { border-top: 4px solid var(--accent); }
+  .interests h2 { margin: 0; }
+  .interests p { margin: 0.5rem 0 0; }
+</style>

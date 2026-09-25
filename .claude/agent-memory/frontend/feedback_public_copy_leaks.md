@@ -16,5 +16,6 @@ metadata:
   - `FALLBACK` ใน `src/lib/profile.ts` ซึ่งขึ้นเว็บเมื่อ parse พลาด ห้ามมีข้อความ scaffold หรือข้อมูลที่ไม่จริง
   - ข้อความ error ตอน runtime (`data.error` จาก API): **ห้ามแสดงดิบ** ให้แปลงเป็นข้อความสำหรับผู้ชมเสมอ ข้อความจริงอยู่ใน D11
   - microcopy ที่มีข้อมูลสำหรับ dev เช่น path API หรือบรรทัด `Audience:`
+- grep HTML จาก dev server อย่างเดียวไม่พอ: ตอน `npm run build` Astro **inline** `<script>` เล็ก ๆ ลงใน HTML (dev เสิร์ฟเป็นไฟล์แยก) ดังนั้น prod HTML ของ guestbook มี `/api/guestbook` ใน JS ทั้งที่ dev grep ไม่เจอ · ตรวจทั้งสองแบบ และแยกให้ออกว่าเป็นข้อความที่ผู้ชมเห็น หรือแค่ endpoint ใน script (พบ 2026-09-25)
 - ห้ามลิงก์ repo หรือ PR ของเว็บนี้จากหน้าเว็บ ลิงก์ได้แค่ GitHub profile (D6)
 - คำอวดบนเว็บต้องตรวจสอบได้ (D3) ถ้าไม่มีหลักฐานให้ลิงก์ ให้ตัดหรือลดความมั่นใจของประโยคลง

@@ -1,18 +1,18 @@
 ---
 name: brand-colors-from-profile
-description: สี/ธีมของเว็บต้องมาจาก docs/PROFILE.md (## Tone) ห้าม hardcode hex ในหน้า · ยังไม่มีสีเจาะจง → frontend เสนอเอง แล้วแก้ที่ :root tokens ใน BaseLayout จุดเดียว
+description: Palette ของเว็บ = D15 (B Teal) ที่เจ้าของเลือกแล้ว · แก้สีที่ :root ใน BaseLayout จุดเดียว · ในหน้าใช้ var(--token) เท่านั้น ห้าม hex · ไฮไลต์เหลืองห้ามเป็นสีตัวอักษร
 metadata:
   type: feedback
 ---
 
-สีหลักของเว็บให้เอาตาม `docs/PROFILE.md` ผู้เรียนขอให้จำไว้ (2026-09-25)
+สีของเว็บต้องมาจากการตัดสินใจที่เจ้าของอนุมัติ ไม่ใช่ที่ frontend คิดเอง ผู้เรียนขอให้จำไว้ (2026-09-25)
 
-**Why:** PROFILE.md เป็น source of truth ของแบรนด์ ถ้าคิดสีหรือ hardcode hex เอง แบรนด์จะหลุดจากโปรไฟล์ และต้องไล่แก้หลายจุดเมื่อ PROFILE เปลี่ยน
+**สถานะ 2026-09-25:** เจ้าของเลือก palette **D15 (B Teal สดชื่น)** ใน `docs/DECISIONS.md` แล้ว และ implement ที่ `:root` ของ `src/layouts/BaseLayout.astro` แล้ว (แทนโทนกรมท่ามืดของ template) · ค่าสีและผล contrast ดูใน D15 อย่าเชื่อ snapshot ในไฟล์นี้
+
+**Why:** PROFILE `## Tone` บอกแค่ "สดใส เป็นกันเอง" ไม่ได้ระบุสี จึงต้องให้เจ้าของเลือกเป็น D-id · ถ้า hardcode hex ในหน้า แบรนด์จะหลุดและต้องไล่แก้หลายจุด
 
 **How to apply:**
-- ก่อนแตะงานสีหรือธีม ให้อ่าน `## Tone` ใน `docs/PROFILE.md` ใหม่ทุกครั้ง อย่าเชื่อ snapshot ในไฟล์นี้
-- สถานะ 2026-09-25 (หลัง Lab 02): มี `## Tone` แล้ว โทน "สดใส เป็นกันเอง" แต่**ยังไม่มีสีเจาะจง** PROFILE มอบให้ frontend เสนอใน Lab 04 และ Brainstorm กำหนดว่า contrast ต้องผ่าน a11y
-- tokens ปัจจุบันใน `:root` ของ `src/layouts/BaseLayout.astro` เป็นโทนกรมท่ามืด ซึ่งอาจไม่ตรงกับ "สดใส" ถ้าจะเปลี่ยนให้เสนอ palette พร้อมผล contrast แล้วให้ผู้เรียนอนุมัติ (บันทึกเป็น D-id ใน DECISIONS) ก่อนแก้
-- ในคอมโพเนนต์และหน้าให้ใช้ `var(--token)` เสมอ ห้ามใส่ hex ตรง ๆ · แก้สีที่ `:root` จุดเดียว
-- `profile.ts` ไม่ได้ parse `## Tone` ให้อ่านจากเอกสาร ไม่ใช่จากโค้ด
-- ถ้าสีใน PROFILE ขัดกับ `docs/DECISIONS.md` ให้หยุดถามผู้เรียนก่อนแก้
+- แก้สีที่ `:root` จุดเดียว · ในหน้าและคอมโพเนนต์ใช้ `var(--token)` เสมอ (hover ใช้ `color-mix()` กับ token ได้ ไม่ต้องเพิ่ม hex)
+- ไฮไลต์เหลือง (`--highlight`) ใช้ตกแต่งเท่านั้น เช่น แถบใต้ข้อความหรือเส้นขอบ ห้ามเป็นสีตัวอักษร
+- ขอบช่องกรอก (input/textarea) ใช้ `--muted` ไม่ใช่ `--border` เพราะ `--border` บนพื้นขาว contrast ต่ำกว่า 3:1 (non-text contrast)
+- จะเปลี่ยน palette ต้องเสนอพร้อมผล contrast แล้วให้เจ้าของอนุมัติเป็น D-id ใหม่ก่อน · ถ้า PROFILE `## Tone` ภายหลังระบุสีที่ขัดกับ D15 ให้หยุดถามก่อนแก้

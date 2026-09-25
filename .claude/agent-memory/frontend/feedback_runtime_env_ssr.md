@@ -13,3 +13,4 @@ metadata:
 - ใช้กับ kill switch `GUESTBOOK_ENABLED` (ค่าที่ปิดคือ `"false"` เท่านั้น) และ env อื่นที่ตั้งใจให้สลับค่าได้ตอน runtime
 - ซ่อนแค่ UI ยังไม่พอ ต้องให้ API ปิดด้วย ฝั่ง API เป็นงาน backend ตามสัญญาใน D10
 - ถือว่าเสร็จเมื่อสลับค่า env แล้ว `curl` ทั้งหน้าเว็บและ API จริง ไม่ใช่แค่ดูโค้ด
+- dev server ที่ 4321 เป็นของผู้เรียน ห้ามรัน `npm run dev` เอง · วิธีที่ใช้ได้: `npm run build` ครั้งเดียว แล้วรัน `node dist/server/entry.mjs` บนพอร์ตอื่น (`HOST=127.0.0.1 PORT=4399`) สลับ `GUESTBOOK_ENABLED` โดยไม่ build ใหม่ · และ grep `dist/server/chunks` ว่ายังเหลือ `process.env.GUESTBOOK_ENABLED` (ไม่ถูกแทนเป็นค่าคงที่)
