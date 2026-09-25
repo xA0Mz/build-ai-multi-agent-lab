@@ -1,1 +1,6 @@
-- [Brand colors from PROFILE](feedback_brand_colors.md) — สีหลักตาม docs/PROFILE.md ห้าม hardcode · ยังไม่มีสี → ใช้ :root tokens ใน BaseLayout
+- [Read DECISIONS before UI](project_read_decisions_before_ui.md) — อ่าน D4/D8/D10/D13/D14 ก่อนงาน UI · DECISIONS ชนะ PROFILE Brainstorm
+- [Brand colors from PROFILE](feedback_brand_colors.md) — สีตาม PROFILE ## Tone (สดใส ยังไม่มีสีเจาะจง) · ใช้ :root tokens · palette ใหม่ต้องให้ผู้เรียนอนุมัติ
+- [Public copy leaks](feedback_public_copy_leaks.md) — ห้าม Lab/คอร์ส/เวิร์กช็อปในหน้าเว็บ แม้ test ไม่จับ · ตรวจ description default, FALLBACK, data.error เอง
+- [profile.ts ownership](project_profile_ts_ownership.md) — Frontend เป็น owner (D12) · คง interests: string[] ให้ /api/interests · whitelist หัวข้อ
+- [Runtime env in SSR](feedback_runtime_env_ssr.md) — env ที่สลับค่าได้อ่านผ่าน process.env ไม่ใช่ import.meta.env · ตรวจด้วย curl
+- [Form UI safety](feedback_form_ui_safety.md) — textContent ทุก field · เช็ค res.ok · ห้ามแสดง error ดิบ · honeypot ซ่อนจาก a11y/autofill
