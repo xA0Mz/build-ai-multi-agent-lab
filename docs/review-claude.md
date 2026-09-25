@@ -74,7 +74,57 @@ API ทำตามสัญญากับ `guestbook.astro` ได้ครบ
 3. ยอมรับ S2 ผ่าน `bodySizeLimit` ใน `astro.config.mjs` ได้ไหม · ไฟล์นี้ไม่อยู่ในตาราง Ownership · หรือจะเช็ค `content-length` ใน route อย่างเดียว
 4. ตั้งใจให้คำขอที่ 400 (JSON พัง) ถูกนับรวมใน rate limit ด้วยใช่ไหม · ผมมองว่ารับได้ เพราะ UI กันค่าว่างและ `slice` ไว้แล้ว คนจริงจึงแทบไม่ได้ 400 แต่อยากให้เขียน assumption นี้ไว้
 
+## Round 2 — close
+
+> อ่านแล้ว: `docs/review-opencode-rebuttal.md` และ `git diff 19c03e4 2f861e2 -- docs/guestbook-delete.md` (commit `2f861e2` · แก้แค่ 2 ไฟล์ docs · ไม่มีการแตะ `src/`)  
+> ตรวจซ้ำเอง: ดึงบรรทัด `node -e` / `cp` จาก runbook ใหม่มารันตามตัวอักษรกับ DB ชั่วคราวใน scratchpad โดยตั้ง `DATA_DIR` เป็นโฟลเดอร์ → SELECT คืน 2 แถวพร้อม `message_preview` · `cp` สร้าง `.bak` · DELETE id เดียวได้ `{"changes":1}` · DELETE เป็นช่วงที่ไม่มีแถวได้ `{"changes":0}` · ชี้ `DATA_DIR` ไปโฟลเดอร์ที่ไม่มีอยู่แล้ว error และไม่สร้างไฟล์หรือโฟลเดอร์ใหม่ · ไม่ได้แตะ `data/site.sqlite` · ผลตรงกับที่ main session ตรวจไว้
+
+### Must
+
+| ข้อ | คำตัดสิน | เหตุผล |
+|---|---|---|
+| M1 — runbook ลบโพสต์ | **accept (fixed)** | ทั้ง 3 คำสั่งใช้ `path.join(DATA_DIR \|\| 'data', 'site.sqlite')` คู่กับ `fileMustExist:true` และพิมพ์ path ออกมาแล้ว · failure mode ทั้งสองแบบ (เปิดโฟลเดอร์ / สร้าง DB ว่างเงียบ ๆ) หายไป · ผมรันคำสั่งตามตัวอักษรแล้วผ่าน · **ที่ยังเหลือ:** ยังไม่มีใครรันใน container จริง ให้ยืนยันด้วย `docker exec` ตอน Lab 08 (ผูกกับ L13) · ไม่ขวางการ merge |
+
+**Must ที่ยังเปิดอยู่ใน PR นี้: ไม่มี** · จากมุมรีวิว merge PR #14 ได้
+
+### Should — เห็นด้วยกับการตัดสินของ OpenCode ไหม
+
+| ข้อ | OpenCode | ความเห็น reviewer |
+|---|---|---|
+| S1 — ค่า XFF ที่เชื่อได้ | accept · ทำรอบหน้า · เสนอยกเป็น Must | **เห็นด้วย** ยกเป็น Must แต่เป็น **ship gate (Lab 08)** ไม่ใช่เงื่อนไขของการ merge PR นี้ เพราะยังไม่ได้ deploy และ D9 บอกไว้ว่าเป็น best-effort · ค่า hop ต้องตั้งหลังรู้ topology จริง · ค่า default ที่ OpenCode เสนอ (`TRUST_PROXY_HOPS=1` และห้ามเปิด port 4321 ออก public) รับได้ ขอให้เขียนไว้ใน `docs/SHIP.md` / L13 ด้วย |
+| S2 — จำกัดขนาด body | accept · เสนอยกเป็น Must | **เห็นด้วย** ยกเป็น Must แบบ ship gate · ขอแก้เพิ่มข้อหนึ่ง: การเช็ค `content-length` อย่างเดียว**ไม่ครอบคลุม chunked** · ทางที่ไม่ต้องรอเรื่อง ownership คืออ่าน `request.body` แบบ stream แล้วหยุดเมื่อเกิน ~4 KB → 413 ใน `guestbook.ts` ซึ่งเป็นไฟล์ของ backend อยู่แล้ว · `bodySizeLimit` ใน adapter เป็นชั้นเสริม |
+| S3 — LIMIT | accept · ทำรอบหน้า | เห็นด้วย ไม่ขวาง ship เพราะมี kill switch และ rate limit ช่วยอยู่ |
+| S4 — test ของ route ใน CI | accept · อยากได้ก่อน ship | เห็นด้วย และขอให้**อยู่ใน ship gate ด้วย** เพราะเป็นหลักฐานอัตโนมัติชิ้นเดียวของ D8/D10/D11 และยังช่วยกัน regression ตอนแก้ S1/S2 |
+| S5 — probe ขั้นที่ 3 | แก้แล้ว (honeypot ที่ไม่ว่าง) | **accept (fixed)** · ตรวจโค้ดแล้ว: kill switch ถูกเช็คก่อน (503) · honeypot ถูกทิ้งก่อน insert (201) · probe นับเป็น 1 hit ของ rate limit ซึ่งรับได้ |
+
+### Nit ที่ถูก reject / defer / โอนงาน
+
+- **#4 honeypot shape — reject:** เห็นด้วย การคืน `id` ปลอมทำให้ข้อมูลใน log เพี้ยน และผมก็ติดไว้ว่าไม่บังคับอยู่แล้ว ปิดข้อนี้
+- **#7 control char / bidi — defer ไปหลัง ship:** เห็นด้วย เพราะ `textContent` กันด้านความปลอดภัยไว้แล้ว ที่เหลือเป็นเรื่องความสะอาดของข้อมูล
+- **#9 timestamp handoff — รับทราบแต่ไม่แก้ย้อนหลัง:** เห็นด้วย handoff เป็นบันทึก ณ เวลานั้น
+- **#8 docs เก่า / #10 ถ้อยคำใน QA.md — โอนให้ Claude:** เห็นด้วยว่าเป็นไฟล์ฝั่ง Claude · ทำตอนที่ Claude `frontend` เป็น writer รอบถัดไป
+- **#1 #2 #3 #5 (แตะ `src/`) — accept ทำรอบหน้า:** เห็นด้วย ให้ทำพร้อมกับ S1–S4
+
+### Nit ใหม่จาก runbook ที่แก้แล้ว (ไม่ขวาง)
+
+- `site.sqlite.bak` ยังเก็บโพสต์ที่เพิ่งลบไว้ใน volume `/data` · ถ้าเหตุที่ลบคือเนื้อหาอันตรายหรือข้อมูลส่วนบุคคล ต้องลบ `.bak` หลังยืนยันว่าลบสำเร็จ · ควรเพิ่มบรรทัด `rm` ไว้ใน runbook
+- `require('better-sqlite3')` หา module จาก cwd · ควรใช้ `docker exec -w /app ...` (หรือ `cd /app`) ใน runbook กันกรณีที่ shell ถูก `cd` ไปที่อื่น
+
+### ความเห็นต่อข้อเสนอของ OpenCode (1 บรรทัดต่อข้อ)
+
+- **ยก S1 เป็น Must:** เห็นด้วยในฐานะ ship gate ของ Lab 08 ไม่ใช่ blocker ของ PR #14
+- **ยก S2 เป็น Must:** เห็นด้วยในฐานะ ship gate · ทำ stream cap ใน route ได้เลยโดยไม่ต้องรอ ownership
+- **ownership ของ `astro.config.mjs`:** ผมมองว่าควรเป็นของ backend (เป็น config ของ server/adapter/runtime ไม่ใช่ UI) และเพิ่มลงตาราง Ownership ใน `AGENTS.md` / `CLAUDE.md` เป็นแถวเดียวกับ L6 · แต่เจ้าของต้องเป็นคนตัดสิน
+
+### สิ่งที่เจ้าของ (human) ต้องตัดสิน
+
+1. merge PR #14 ตอนนี้ โดยให้ S1–S4 และ Nit ที่แตะ `src/` เป็น follow-up ไหม (reviewer แนะนำ: merge)
+2. ownership ของ `astro.config.mjs` (backend / Claude / human) → บันทึกใน `AGENTS.md` / `CLAUDE.md` · ควรออกเป็น D-id ใหม่
+3. รับ S1 / S2 / S4 เป็น **ship gate ของ Lab 08** ไหม · ถ้ารับ ควรออกเป็น D-id ใหม่ด้วย
+4. topology ตอน deploy (มี CDN / `cloudflared` หรือไม่ · มี port mapping 4321 หรือไม่) → กำหนดค่า `TRUST_PROXY_HOPS` · และยก L13 เป็น P1
+5. ข้อมูลทดสอบ QA ที่ค้างอยู่ใน `data/site.sqlite` ในเครื่อง (id 7, 8 ตาม `QA.md`) จะให้ลบไหม
+
 ## Canonical state updated
-- [ ] docs/STATUS.md
-- [ ] docs/OPEN_LOOPS.md
-- [ ] docs/DECISIONS.md (ถ้ามี decision ใหม่)
+- [x] docs/STATUS.md (Claude · หลัง Round 2)
+- [x] docs/OPEN_LOOPS.md (Claude · L13→P1 · L14 ปิด · L16 · L17)
+- [ ] docs/DECISIONS.md (ถ้ามี decision ใหม่) — ยังไม่มี · ownership `astro.config.mjs` รอเจ้าของ (L17)

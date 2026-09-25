@@ -60,6 +60,6 @@
 
 ## Canonical state updated
 
-- [ ] docs/STATUS.md
-- [ ] docs/OPEN_LOOPS.md
+- [x] docs/STATUS.md (Claude · หลัง Round 2)
+- [x] docs/OPEN_LOOPS.md (Claude · L13→P1 · L14 ปิด · L16 · L17)
 - [ ] docs/DECISIONS.md (ถ้ามี decision ใหม่ — ข้อเสนอที่ต้องตัดสิน: ownership ของ `astro.config.mjs` (คำตอบ 3) และการยก S1/S2 เป็น Must รอบหน้า)
