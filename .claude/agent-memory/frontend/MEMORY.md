@@ -1,0 +1,1 @@
+- [Brand colors from PROFILE](feedback_brand_colors.md) — สีหลักตาม docs/PROFILE.md ห้าม hardcode · ยังไม่มีสี → ใช้ :root tokens ใน BaseLayout
