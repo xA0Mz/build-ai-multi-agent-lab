@@ -3,8 +3,8 @@
 > คัดลอกเป็น `docs/STATUS.md` ใน Lab 00 · อ่านทุก session · **สั้น** · single-writer ต่อรอบ  
 > ดู [`COURSE.md`](../COURSE.md) ชั้น State (Hot)
 
-Last updated: 2026-09-25 15:20 +07:00  
-Updated by: OpenCode
+Last updated: 2026-09-25 15:50 +07:00  
+Updated by: Claude
 
 ## Current goal
 
@@ -23,7 +23,7 @@ Updated by: OpenCode
 
 ## In progress
 
-- —
+- PR #14 [Lab 05] Guestbook API รอ review / merge (Closes #5 · Refs #6)
 
 ## Blocked
 
@@ -31,7 +31,7 @@ Updated by: OpenCode
 
 ## Next actions
 
-1. push `lab-05-backend` + เปิด PR Backend (Closes #5 · Refs #6) — งานถัดไปหลัง L11
+1. เจ้าของ: review + merge PR #14 · ข้อจำกัด rate limit ตอน deploy = L13
 2. Claude: Lab 06 QA ตาม `docs/handoffs/05-opencode-to-claude.md` · แก้ `playwright/smoke.spec.ts` (L8) · ชื่อ error body จริงดูใน `docs/be-fe-integration-check.md`
 3. เจ้าของ: อ่านทวน case study (#2 · L9) · อีเมลนามแฝง (L3)
 
